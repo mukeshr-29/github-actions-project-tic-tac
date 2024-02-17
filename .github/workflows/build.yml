@@ -41,4 +41,26 @@ jobs:
           docker push mukeshr29/tic-tac-game
         env:
           DOCKER_CLI_ACI: 1
-          
+
+  deploy:
+    needs: build-analyze-scan  
+    runs-on: [self-hosted]
+    steps:
+      - name: trivy img scan for deploy
+        run: trivy image mukeshr29/tic-tac-game > trivyimg.txt 
+        
+      - name: update kubeconfig
+        run: aws eks --region us-east-1 update-kubeconfig --name github-action
+      
+      - name: deploy to eks
+        run: kubectl apply -f deployment.yml -f service.yml
+
+      - name: send a slack notification
+        if: always()
+        uses: act10ns/slack@v1
+        with:
+          status: ${{job.status}}
+          steps: ${{toJson(steps)}}
+          channel: '#github-action'
+        env: 
+          SLACK_WEBHOOK_URL: ${{secrets.SLACK_WEBHOOK_URL}}
