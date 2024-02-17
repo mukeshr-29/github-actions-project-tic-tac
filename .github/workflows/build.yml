@@ -23,6 +23,22 @@ jobs:
 
       - name: install npm
         run: npm install
-        
+
       - name: trivy file scan
         run: trivy fs . > trivyfs.txt 
+      
+      - name: docker build & tag
+        run: |
+          docker build -t tic-tac-game .
+          docker tag tic-tac-game mukeshr29/tic-tac-game
+
+      - name: trivy img scan
+        run: trivy image mukeshr29/tic-tac-game > trivyimg.txt
+
+      - name: docker build image push
+        run: |
+          docker login -u ${{ secrets.DOCKERHUB_USERNAME }} -p ${{ secrets.DOCKERHUB_TOKEN }}
+          docker push mukeshr29/tic-tac-game
+        env:
+          DOCKER_CLI_ACI: 1
+          
