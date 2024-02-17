@@ -1,0 +1,19 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: tic-tac-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: tic-tac
+  template:
+    metadata:
+      labels:
+        app: tic-tac
+    spec:
+      containers:
+      - name: tic-tac
+        image: mukeshr29/tic-tac-game
+        ports:
+        - containerPort: 3000
